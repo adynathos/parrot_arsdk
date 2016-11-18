@@ -4,11 +4,12 @@ set -e
 
 ARSDK_MANIFEST_HASH="149b0e0fe374c12db48c8beaed167a4a5555a370"
 ARSDK_VERSION="3_10_1"
-PATCH_LEVEL="0"
+#PATCH_LEVEL="0"
+PATCH_LEVEL="_stable_ports"
 
 TMP_WS=`mktemp -d`
 CURRENT_DIR=`pwd`
-OUTPUT_ARCHIVE=${CURRENT_DIR}/arsdk_${ARSDK_VERSION}_p${PATCH_LEVEL}_stripped.tgz
+OUTPUT_ARCHIVE=${CURRENT_DIR}/sdk/arsdk_${ARSDK_VERSION}_p${PATCH_LEVEL}_stripped.tgz
 
 echo "Temporary workspace: $TMP_WS"
 echo "Output: $OUTPUT_ARCHIVE"
@@ -20,7 +21,11 @@ echo "y" | ./repo init -u https://github.com/Parrot-Developers/arsdk_manifests.g
 ./repo sync -c
 
 echo "Applying patches ..."
+echo "dragon_disable_root_check.patch"
 cd ${TMP_WS}/build/dragon_build && git reset --hard && git apply ${CURRENT_DIR}/patch/dragon_disable_root_check.patch
+echo "stable_ports.patch at $TMP_WS"
+cd ${TMP_WS}/packages/libARController && git reset --hard && git am < ${CURRENT_DIR}/patch/stable_ports.patch
+
 cd $TMP_WS
 
 mv packages packages.git
